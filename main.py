@@ -75,6 +75,29 @@ def transcribe_with_custom_model(client, uri, properties):
     return transcription_definition
 
 
+def transcribe_with_custom_model_from_container(client, uri, properties):
+    """
+    Transcribe all files in the container located at `uri` using the settings specified in `properties`
+    using the base model for the specified locale.
+    """
+    # Model information (ADAPTED_ACOUSTIC_ID and ADAPTED_LANGUAGE_ID) must be set above.
+    if MODEL_REFERENCE is None:
+        logging.error("Custom model ids must be set when using custom models")
+        sys.exit()
+
+    model = {'self': f'{client.configuration.host}/models/base/{MODEL_REFERENCE}'}    
+
+    transcription_definition = swagger_client.Transcription(
+        display_name=NAME,
+        description=DESCRIPTION,
+        locale=LOCALE,
+        content_container_url=uri,
+        model=model,        
+        properties=properties
+    )
+
+    return transcription_definition
+
 def transcribe_from_container(uri, properties):
     """
     Transcribe all files in the container located at `uri` using the settings specified in `properties`
@@ -89,7 +112,6 @@ def transcribe_from_container(uri, properties):
     )
 
     return transcription_definition
-
 
 def _paginate(api, paginated_object):
     """
@@ -152,7 +174,7 @@ def transcribe():
     # properties.display_form_word_level_timestamps_enabled = True
     # properties.punctuation_mode = "DictatedAndAutomatic"
     # properties.profanity_filter_mode = "Masked"
-    #properties.destination_container_url = DESTINATION_CONTAINER_URI
+    # properties.destination_container_url = DESTINATION_CONTAINER_URI
     # properties.time_to_live = "PT1H"
 
     # uncomment the following block to enable and configure speaker separation
@@ -161,7 +183,7 @@ def transcribe():
     #     swagger_client.DiarizationSpeakersProperties(min_count=1, max_count=5))
 
     # properties.language_identification = swagger_client.LanguageIdentificationProperties(["en-US", "ja-JP"])
-
+    #properties.model = MODEL_REFERENCE
     # Use base models for transcription. Comment this block if you are using a custom model.
     #transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URI, properties)
 
@@ -170,7 +192,8 @@ def transcribe():
 
     # uncomment the following block to enable and configure language identification prior to transcription
     # Uncomment this block to transcribe all files from a container.
-    transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
+    #transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
+    transcription_definition = transcribe_with_custom_model_from_container(client, RECORDINGS_CONTAINER_URI, properties)
 
     created_transcription, status, headers = api.transcriptions_create_with_http_info(transcription=transcription_definition)
 
