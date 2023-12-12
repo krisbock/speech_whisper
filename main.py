@@ -33,7 +33,7 @@ LOCALE = "en-US"
 RECORDINGS_CONTAINER_URI = os.getenv("RECORDINGS_CONTAINER_URI")
 
 # Set model information when doing transcription with custom models
-MODEL_REFERENCE="512a7513-cf0e-4173-885e-bc4e30ca1267"
+MODEL_REFERENCE=os.getenv("MODEL_REFERENCE")
 
 def transcribe_from_single_blob(uri, properties):
     """
